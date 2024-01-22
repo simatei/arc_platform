@@ -1,6 +1,30 @@
 name: Arc Platform CI Workflow
 on: [push, pull_request]
 jobs:
+
+  lhci:
+    name: Lighthouse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.13.1
+      - name: yarn install, build
+        run: |
+          yarn install
+          yarn run build
+      - name: run Lighthouse CI
+        run: |
+          yarn global add @lhci/cli@0.13.0
+          lhci autorun
+          env:
+            LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+            
+
   linters:
     name: RuboCop Linter
     runs-on: ubuntu-latest
